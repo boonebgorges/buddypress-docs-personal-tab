@@ -124,7 +124,11 @@ add_filter( 'bp_docs_directory_breadcrumb', 'bp_docs_personal_directory_breadcru
  * nav items.
  */
 function bpdpt_current_action() {
-	if ( bp_docs_is_started_by() && ! empty( $_GET['folder'] ) ) {
+	if (
+		( bp_docs_is_started_by() && ! empty( $_GET['folder'] ) )
+		||
+		( bp_docs_is_docs_component() && bp_is_my_profile() && ! empty( $_GET['view'] ) && 'manage' === $_GET['view'] )
+	) {
 		buddypress()->current_action = BP_DOCS_PERSONAL_SLUG;
 	}
 }
