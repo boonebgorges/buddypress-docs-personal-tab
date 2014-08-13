@@ -118,6 +118,53 @@ function bp_docs_personal_directory_breadcrumb( $crumbs ) {
 add_filter( 'bp_docs_directory_breadcrumb', 'bp_docs_personal_directory_breadcrumb', 1 );
 
 /**
+ * Add top-level breadcrumb item to single Doc.
+ *
+ * This doesn't appear in the breadcrumbs by default because the Docs
+ * themselves are not actually "personal". It's only on this implementation
+ * that a Doc without a group affiliation counts as "personal".
+ */
+function bpdpt_user_single_breadcrumb( $crumbs, $doc = null ) {
+
+	if ( is_a( $doc, 'WP_Post' ) ) {
+		$doc_id = $doc->ID;
+	} else if ( bp_docs_is_existing_doc() ) {
+		$doc_id = get_queried_object_id();
+	}
+
+	// Only continue if there's no folder
+	if ( ! empty( $doc_id ) ) {
+		$folder_id = bp_docs_get_doc_folder( $doc_id );
+	}
+
+	if ( ! empty( $folder_id ) ) {
+		return $crumbs;
+	}
+
+	// Only continue if there's no group
+	$group_id = bp_docs_get_associated_group_id( $doc->ID );
+
+	if ( ! empty( $group_id ) ) {
+		return $crumbs;
+	}
+
+	$user_id = $doc->post_author;
+
+	$user_crumbs = array(
+		sprintf(
+			'<a href="%s">%s&#8217;s Docs</a>',
+			bp_core_get_user_domain( $user_id ) . bp_docs_get_slug() . '/',
+			bp_core_get_user_displayname( $user_id )
+		),
+	);
+
+	$crumbs = array_merge( $user_crumbs, $crumbs );
+
+	return $crumbs;
+}
+add_action( 'bp_docs_doc_breadcrumbs', 'bpdpt_user_single_breadcrumb', 98, 2 );
+
+/**
  * If there's a folder selected, set Current Action to 'personal'.
  *
  * This helps set the breadcrumbs and ensure the proper 'current' state for
