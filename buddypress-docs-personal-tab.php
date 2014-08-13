@@ -137,8 +137,20 @@ add_filter( 'bp_setup_nav', 'bpdpt_current_action', 9999 );
 /**
  * Don't show the Global option on the folder type selector dropdown.
  */
-function bpdpt_folder_type_selector( $s ) {
+function bpdpt_folder_type_selector( $s, $r ) {
 	$s = preg_replace( '|<option.*?value=\"global.*?/option>|', '', $s );
 	return $s;
 }
-add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector' );
+add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector', 10, 2 );
+
+/**
+ * When 'global' is selected in folder selector, force to 'me'.
+ */
+function bpdpt_folder_selector_args( $r ) {
+	if ( empty( $r['group_id'] ) ) {
+		$r['user_id'] = bp_loggedin_user_id();
+	}
+
+	return $r;
+}
+add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
