@@ -14,6 +14,28 @@ if ( ! defined( 'BP_DOCS_PERSONAL_SLUG' ) ) {
 }
 
 /**
+ * Conditionally hook functionality.
+ */
+function bpdpt_setup() {
+	if ( ! bp_docs_enable_folders() ) {
+		return;
+	}
+
+	add_action( 'bp_bp_docs_setup_nav', 'bpdpt_setup_nav' );
+	add_filter( 'bp_before_bp_docs_get_folders_parse_args', 'bpdpt_filter_bp_docs_get_folders_args' );
+	add_filter( 'bp_before_bp_docs_has_docs_parse_args', 'bpdpt_filter_bp_docs_has_docs_args' );
+	add_action( 'bp_screens', 'bpdpt_remove_group_column' );
+	add_action( 'bp_screens', 'bpdpt_remove_author_column' );
+	add_action( 'wp_enqueue_scripts', 'bpdpt_enqueue_assets' );
+	add_filter( 'bp_docs_directory_breadcrumb', 'bp_docs_personal_directory_breadcrumb', 1 );
+	add_action( 'bp_docs_doc_breadcrumbs', 'bpdpt_user_single_breadcrumb', 98, 2 );
+	add_filter( 'bp_setup_nav', 'bpdpt_current_action', 9999 );
+	add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector', 10, 2 );
+	add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
+}
+add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
+
+/**
  * Set up Personal nav item.
  */
 function bpdpt_setup_nav() {
@@ -27,7 +49,6 @@ function bpdpt_setup_nav() {
 		'user_has_access' => bp_is_my_profile(),
 	) );
 }
-add_action( 'bp_bp_docs_setup_nav', 'bpdpt_setup_nav' );
 
 /**
  * Ensure that Personal tab shows folders from the current user, and don't show
@@ -44,7 +65,6 @@ function bpdpt_filter_bp_docs_get_folders_args( $r ) {
 
 	return $r;
 }
-add_filter( 'bp_before_bp_docs_get_folders_parse_args', 'bpdpt_filter_bp_docs_get_folders_args' );
 
 /**
  * Ensure that Personal tab shows Docs from the current user.
@@ -57,7 +77,6 @@ function bpdpt_filter_bp_docs_has_docs_args( $r ) {
 
 	return $r;
 }
-add_filter( 'bp_before_bp_docs_has_docs_parse_args', 'bpdpt_filter_bp_docs_has_docs_args' );
 
 /**
  * Remove the Group column from the Personal page.
@@ -68,7 +87,6 @@ function bpdpt_remove_group_column() {
 		remove_filter( 'bp_docs_loop_additional_td', array( buddypress()->bp_docs->groups_integration, 'groups_td' ), 5 );
 	}
 }
-add_action( 'bp_screens', 'bpdpt_remove_group_column' );
 
 /**
  * Remove the Group column from the Personal page.
@@ -79,7 +97,6 @@ function bpdpt_remove_author_column() {
 		remove_filter( 'bp_docs_loop_additional_td', array( buddypress()->bp_docs->groups_integration, 'groups_td' ), 5 );
 	}
 }
-add_action( 'bp_screens', 'bpdpt_remove_author_column' );
 
 /**
  * Enqueue assets
@@ -90,7 +107,6 @@ function bpdpt_enqueue_assets() {
 		wp_enqueue_script( 'bpdpt', plugins_url( 'buddypress-docs-personal-tab/bpdpt.js' ), array( 'bp-docs-folders' ) );
 	}
 }
-add_action( 'wp_enqueue_scripts', 'bpdpt_enqueue_assets' );
 
 /**
  * Add Personal information to directory breadcrumbs.
@@ -115,7 +131,6 @@ function bp_docs_personal_directory_breadcrumb( $crumbs ) {
 
 	return $crumbs;
 }
-add_filter( 'bp_docs_directory_breadcrumb', 'bp_docs_personal_directory_breadcrumb', 1 );
 
 /**
  * Add top-level breadcrumb item to single Doc.
@@ -162,7 +177,6 @@ function bpdpt_user_single_breadcrumb( $crumbs, $doc = null ) {
 
 	return $crumbs;
 }
-add_action( 'bp_docs_doc_breadcrumbs', 'bpdpt_user_single_breadcrumb', 98, 2 );
 
 /**
  * If there's a folder selected, set Current Action to 'personal'.
@@ -179,7 +193,6 @@ function bpdpt_current_action() {
 		buddypress()->current_action = BP_DOCS_PERSONAL_SLUG;
 	}
 }
-add_filter( 'bp_setup_nav', 'bpdpt_current_action', 9999 );
 
 /**
  * Don't show the Global option on the folder type selector dropdown.
@@ -188,7 +201,6 @@ function bpdpt_folder_type_selector( $s, $r ) {
 	$s = preg_replace( '|<option.*?value=\"global.*?/option>|', '', $s );
 	return $s;
 }
-add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector', 10, 2 );
 
 /**
  * When 'global' is selected in folder selector, force to 'me'.
@@ -200,4 +212,3 @@ function bpdpt_folder_selector_args( $r ) {
 
 	return $r;
 }
-add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
