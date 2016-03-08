@@ -21,7 +21,8 @@ function bpdpt_setup() {
 		return;
 	}
 
-	add_action( 'bp_bp_docs_setup_nav', 'bpdpt_setup_nav' );
+	bpdpt_setup_nav();
+
 	add_filter( 'bp_before_bp_docs_get_folders_parse_args', 'bpdpt_filter_bp_docs_get_folders_args' );
 	add_filter( 'bp_before_bp_docs_has_docs_parse_args', 'bpdpt_filter_bp_docs_has_docs_args' );
 	add_action( 'bp_screens', 'bpdpt_remove_group_column' );
@@ -32,6 +33,7 @@ function bpdpt_setup() {
 	add_filter( 'bp_setup_nav', 'bpdpt_current_action', 9999 );
 	add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector', 10, 2 );
 	add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
+	add_filter( 'bp_docs_taxonomy_get_user_terms', 'bpdpt_get_user_terms' );
 }
 add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
 
@@ -211,4 +213,54 @@ function bpdpt_folder_selector_args( $r ) {
 	}
 
 	return $r;
+}
+
+/**
+ * Copied from buddypress-docs because the created/edited checks are hardcoded.
+ */
+function bpdpt_get_user_terms( $terms ) {
+	global $wpdb;
+
+	if ( ! bp_is_user() ) {
+		return $terms;
+	}
+
+	$query_args = array(
+		'post_type'         => bp_docs_get_post_type_name(),
+		'update_meta_cache' => false,
+		'update_term_cache' => true,
+		'showposts'         => '-1',
+		'posts_per_page'    => '-1',
+		'author_id'         => bp_displayed_user_id(),
+		'group_id'          => array(),
+	);
+
+	$user_doc_query = new WP_Query( $query_args );
+
+	$terms = array();
+	foreach ( $user_doc_query->posts as $p ) {
+		$p_terms = wp_get_post_terms( $p->ID, buddypress()->bp_docs->docs_tag_tax_name );
+		foreach ( $p_terms as $p_term ) {
+			if ( ! isset( $terms[ $p_term->slug ] ) ) {
+				$terms[ $p_term->slug ] = array(
+					'name' => $p_term->name,
+					'posts' => array(),
+				);
+			}
+
+			if ( ! in_array( $p->ID, $terms[ $p_term->slug ]['posts'] ) ) {
+				$terms[ $p_term->slug ]['posts'][] = $p->ID;
+			}
+		}
+	}
+
+	foreach ( $terms as &$t ) {
+		$t['count'] = count( $t['posts'] );
+	}
+
+	if ( empty( $terms ) ) {
+		$terms = array();
+	}
+
+	return $terms;
 }
