@@ -34,6 +34,7 @@ function bpdpt_setup() {
 	add_filter( 'bp_docs_folder_type_selector', 'bpdpt_folder_type_selector', 10, 2 );
 	add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
 	add_filter( 'bp_docs_taxonomy_get_user_terms', 'bpdpt_get_user_terms' );
+	add_filter( 'bp_docs_page_links_base_url', 'bpdpt_filter_bp_docs_page_links_base_url', 10, 2 );
 }
 add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
 
@@ -263,4 +264,19 @@ function bpdpt_get_user_terms( $terms ) {
 	}
 
 	return $terms;
+}
+
+/**
+ * On user Doc directories, modify the pagination base so that pagination
+ * works within the directory.
+ *
+ * @package BuddyPress_Docs
+ * @subpackage Users
+ * @since 1.9.0
+ */
+function bpdpt_filter_bp_docs_page_links_base_url( $base_url, $wp_rewrite_pag_base  ) {
+	if ( bp_is_user() && bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
+		$base_url = user_trailingslashit( bp_displayed_user_domain() . bp_docs_get_docs_slug() . '/'. BP_DOCS_PERSONAL_SLUG . '/' . $wp_rewrite_pag_base . '/%#%/' );
+	}
+	return $base_url;
 }
