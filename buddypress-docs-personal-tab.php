@@ -17,6 +17,10 @@ if ( ! defined( 'BP_DOCS_PERSONAL_SLUG' ) ) {
  * Conditionally hook functionality.
  */
 function bpdpt_setup() {
+	if ( ! function_exists( 'bp_docs_enable_folders' ) ) {
+		return;
+	}
+
 	if ( ! bp_docs_enable_folders() ) {
 		return;
 	}
