@@ -109,7 +109,18 @@ function bpdpt_remove_author_column() {
  * Enqueue assets
  */
 function bpdpt_enqueue_assets() {
+	$enqueue = false;
+
+	// Personal tab.
 	if ( bp_is_user() && bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
+		$enqueue = true;
+
+	// Edit/create.
+	} elseif ( bp_docs_is_doc_create() || bp_docs_is_doc_edit() ) {
+		$enqueue = true;
+	}
+
+	if ( $enqueue ) {
 		wp_enqueue_style( 'bpdpt', plugins_url( 'buddypress-docs-personal-tab/bpdpt.css' ) );
 		wp_enqueue_script( 'bpdpt', plugins_url( 'buddypress-docs-personal-tab/bpdpt.js' ), array( 'bp-docs-folders' ) );
 	}
