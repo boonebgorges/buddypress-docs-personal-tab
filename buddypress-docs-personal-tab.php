@@ -27,6 +27,7 @@ function bpdpt_setup() {
 
 	bpdpt_setup_nav();
 
+	add_filter( 'bp_docs_enable_folders_for_current_context', 'bpdpt_enable_folders_in_personal_tab' );
 	add_filter( 'bp_before_bp_docs_get_folders_parse_args', 'bpdpt_filter_bp_docs_get_folders_args' );
 	add_filter( 'bp_before_bp_docs_has_docs_parse_args', 'bpdpt_filter_bp_docs_has_docs_args' );
 	add_action( 'bp_screens', 'bpdpt_remove_group_column' );
@@ -41,6 +42,17 @@ function bpdpt_setup() {
 	add_filter( 'bp_docs_page_links_base_url', 'bpdpt_filter_bp_docs_page_links_base_url', 10, 2 );
 }
 add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
+
+/**
+ * Enable folders in the Personal tab context.
+ */
+function bpdpt_enable_folders_in_personal_tab( $enable ) {
+	if ( bp_is_user() && bp_docs_is_docs_component() && bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
+		$enable = true;
+	}
+
+	return $enable;
+}
 
 /**
  * Set up Personal nav item.
