@@ -240,17 +240,19 @@ function bpdpt_get_user_terms( $terms ) {
 
 	$terms = array();
 	foreach ( $user_doc_query->posts as $p ) {
-		$p_terms = wp_get_post_terms( $p->ID, buddypress()->bp_docs->docs_tag_tax_name );
-		foreach ( $p_terms as $p_term ) {
-			if ( ! isset( $terms[ $p_term->slug ] ) ) {
-				$terms[ $p_term->slug ] = array(
-					'name' => $p_term->name,
-					'posts' => array(),
-				);
-			}
+		$p_terms = get_the_terms( $p->ID, buddypress()->bp_docs->docs_tag_tax_name );
+		if ( $p_terms ) {
+			foreach ( $p_terms as $p_term ) {
+				if ( ! isset( $terms[ $p_term->slug ] ) ) {
+					$terms[ $p_term->slug ] = array(
+						'name' => $p_term->name,
+						'posts' => array(),
+					);
+				}
 
-			if ( ! in_array( $p->ID, $terms[ $p_term->slug ]['posts'] ) ) {
-				$terms[ $p_term->slug ]['posts'][] = $p->ID;
+				if ( ! in_array( $p->ID, $terms[ $p_term->slug ]['posts'] ) ) {
+					$terms[ $p_term->slug ]['posts'][] = $p->ID;
+				}
 			}
 		}
 	}
