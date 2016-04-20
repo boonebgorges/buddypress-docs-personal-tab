@@ -48,8 +48,12 @@ add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
  * Enable folders in the Personal tab context.
  */
 function bpdpt_enable_folders_in_personal_tab( $enable ) {
-	if ( bp_is_user() && bp_docs_is_docs_component() && bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
-		$enable = true;
+	if ( bp_is_user() && bp_docs_is_docs_component() ) {
+		if ( bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
+			$enable = true;
+		} elseif ( ! empty( $_GET['folder'] ) ) {
+			$enable = true;
+		}
 	}
 
 	return $enable;
