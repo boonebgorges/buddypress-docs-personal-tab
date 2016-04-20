@@ -41,6 +41,8 @@ function bpdpt_setup() {
 	add_action( 'bp_before_bp_docs_folder_selector_parse_args', 'bpdpt_folder_selector_args' );
 	add_filter( 'bp_docs_taxonomy_get_user_terms', 'bpdpt_get_user_terms' );
 	add_filter( 'bp_docs_page_links_base_url', 'bpdpt_filter_bp_docs_page_links_base_url', 10, 2 );
+
+	add_filter( 'bp_docs_get_default_access_options', 'bpdpt_filter_default_access_options', 10, 3 );
 }
 add_action( 'bp_docs_load_doc_extras', 'bpdpt_setup' );
 
@@ -313,4 +315,24 @@ function bpdpt_filter_bp_docs_page_links_base_url( $base_url, $wp_rewrite_pag_ba
 		$base_url = user_trailingslashit( bp_displayed_user_domain() . bp_docs_get_docs_slug() . '/'. BP_DOCS_PERSONAL_SLUG . '/' . $wp_rewrite_pag_base . '/%#%/' );
 	}
 	return $base_url;
+}
+
+/**
+ * Filter default access options.
+ *
+ * When not associated with a group, access option should default to "author only".
+ */
+function bpdpt_filter_default_access_options( $defaults, $doc_id, $group_id ) {
+	if ( ! $group_id ) {
+		$defaults = array(
+			'read' => 'creator',
+			'edit' => 'creator',
+			'read_comments' => 'creator',
+			'post_comments' => 'creator',
+			'view_history' => 'creator',
+			'manage' => 'creator',
+		);
+	}
+
+	return $defaults;
 }
