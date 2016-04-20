@@ -28,6 +28,7 @@ function bpdpt_setup() {
 	bpdpt_setup_nav();
 
 	add_filter( 'bp_docs_enable_folders_for_current_context', 'bpdpt_enable_folders_in_personal_tab' );
+	add_filter( 'bp_docs_folders_force_metabox', '__return_true' );
 	add_filter( 'bp_before_bp_docs_get_folders_parse_args', 'bpdpt_filter_bp_docs_get_folders_args' );
 	add_filter( 'bp_before_bp_docs_has_docs_parse_args', 'bpdpt_filter_bp_docs_has_docs_args' );
 	add_action( 'bp_screens', 'bpdpt_remove_group_column' );
