@@ -336,3 +336,18 @@ function bpdpt_filter_default_access_options( $defaults, $doc_id, $group_id ) {
 
 	return $defaults;
 }
+
+
+/**
+ * Make sure the Personal tab is persisted in the folder links URL.
+ *
+ */
+function persist_personal_tab_url( $url, $folder_id ) {
+	if ( bp_is_user() && bp_is_current_action( BP_DOCS_PERSONAL_SLUG ) ) {
+		$url = remove_query_arg( 'folder', $url);
+		$url .= BP_DOCS_PERSONAL_SLUG . '/';
+		$url = add_query_arg( 'folder', $folder_id, $url );
+	}
+	return $url;
+}
+add_filter( 'bp_docs_get_folder_url', 'persist_personal_tab_url', 10, 2 );
